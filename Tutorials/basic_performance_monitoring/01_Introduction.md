@@ -1,4 +1,4 @@
-# Setting Up a Bausic Performance Monitoring Server
+# Setting Up a Basic Performance Monitoring Server
 
 ## Introduction
 The purpose of this tutorial is to help you setup a monitoring server capable of collecting performance data (metrics) from devices in order to assist
