@@ -13,7 +13,9 @@ The default method of storing data is to store it in InfluxDB, that's why we onl
 
 Telegraf writes metrics to InfluxDB using the folowing format, known as Influx line protocol:
 
+````
 <measurement>,[tag_set] [field_set] <timestamp>
+````
 
 The measurement from Telegrafs perspective is the name of the input so from our configuration we wil have two measures; ping and big_ping.
 
