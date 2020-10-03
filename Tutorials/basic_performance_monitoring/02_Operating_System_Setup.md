@@ -63,7 +63,7 @@ Once they are all running very the ports are listing using netstat -atn | egrep 
 
 ## Summary
 In this section we have now sucessfully setup the basic server and can now get onto the more fun bits of making it do something. 
-Continue on to [Configuring Data Collection](01_Configuring_Basic_Data_Collection.md)
+Continue on to [Configuring Data Collection](03_Configuring_Basic_Data_Collection.md)
 
 # Reference
 ## InfluxData
