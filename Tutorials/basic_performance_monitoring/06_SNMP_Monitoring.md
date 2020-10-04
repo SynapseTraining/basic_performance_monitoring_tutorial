@@ -63,7 +63,7 @@ something a little more complex.
 Do you recall the ifTable mentioned earlier?
 
 The ifTable gives information on all the network interfaces on the device. If you have a high density switch, this could be many hundreds 
-of values so querying each one individually woudl be very boring.
+of values so querying each one individually would be very boring.
 
 The SNMP utilities however give us another useful command which allows us to automatically traverse the table and show all possible values. Be 
 warned the output from this command could be very long, recommend outputting to a file if you want to read it.
@@ -120,8 +120,6 @@ IF-MIB::ifOutQLen.1 = Gauge32: 0
 IF-MIB::ifOutQLen.2 = Gauge32: 0
 ````
 
-Any of the numeric values (INTEGER, Counter32, Gauge32) can be used for performance monitoring and the text value (STRING) can be added as tags
- if necessary by Telegraf.
 
 One important note, I choose to use 32-bit counters here as that is not most commonly supported.  If you are trying to monitor devices with
 High Capacity (HC) Interfaces, you may need to use the `ifXTable` instead. Exactly what is best for your device depends on the model, best 
@@ -132,6 +130,137 @@ to check your vendors documentation. All that will really change is that instead
 $ snmpwalk -c $SNMPCOMMUNITY -v 2c $SNMPHOST ifXTable
 ````
 
+### Understanding SNMP data types
+This is not an SNMP tutorial but in understanding what and how to graph a brief explanation may help.
+
+Any of the numeric values (INTEGER, Counter32, Gauge32) can be used for performance monitoring.
+
+INTEGER is a single value which can be positive or negative. Often it wil be mapped to a specific description value, for example with 
+ifAdminStatus indicating if a port has been enabled a value of 1 means enable. and 0 means disabled. You could use this for example to only 
+store values in the database for interfaces that are up.
+
+Gauge32 is a single positive value within a a defined range.  This is only visible as single type in our output for `ifSpeed` or `ifHighSpeed` 
+and tells us the speed at which an interface is running (for example 100 is 100Mbps). Gauge32 will never wrap around. You may also see this for 
+values representing percentage (e.g. RAM or CPU Usage).
+
+The final numeric type we have is Counter32 (or Counter64 for High Capacity), is a non-negative value which when the maximum is reached will wrap around. We
+see this type a lot in our output as many of the values could go on forever if the counters are not reset.  In the majority of cases we are
+not concerned by the raw value but the rate of change between queries.  For example we may want to know Packets (Pkts) or Bytes (Octets) per 
+second. SNMP does not calculate that for us automatically, we will need to do some work in the queries so the graphs are correct.
+
+Finally we have non-numeric or text values (STRING) canot be processed direclty by Telegrad or InfluxDB but can be added as tags if necessary by Telegraf to give more context
+to the values.  For example adding the `ifName` as a tag means you query details on specific interfaces later.
+
 
 ### Configuring Telegraf for SNMP
+Because of the multiple values setting up SNMP in telegraf isn't as simple as our last plugin. Lets get it configured and we can work through 
+it step-by-step.
+
+Open you your text editor of choice (e.g. nano) and createa new file in the Telegraf config directory.
+
+````
+sudo nano /etc/telegraf/telegraf.d/snmp.conf
+````
+
+Now paste all of the following
+````
+[[inputs.snmp]]
+  agents = [ "<DEVICEIP>:161" ]
+  version = 2
+  community = "<COMMUNITY>"
+
+  [[inputs.snmp.field]]
+    name = "hostname"
+    oid = "RFC1213-MIB::sysName.0"
+    is_tag = true
+
+  [[inputs.snmp.field]]
+    name = "uptime"
+    oid = "DISMAN-EXPRESSION-MIB::sysUpTimeInstance"
+
+  # IF-MIB::ifTable contains counters on input and output traffic as well as errors and discards.
+  [[inputs.snmp.table]]
+    name = "interface"
+    inherit_tags = [ "hostname" ]
+    oid = "IF-MIB::ifTable"
+
+    # Interface tag - used to identify interface in metrics database
+    [[inputs.snmp.table.field]]
+      name = "ifDescr"
+      oid = "IF-MIB::ifDescr"
+      is_tag = true
+
+  # IF-MIB::ifXTable contains newer High Capacity (HC) counters that do not overflow as fast for a few of the ifTable counters
+  [[inputs.snmp.table]]
+    name = "interface"
+    inherit_tags = [ "hostname" ]
+    oid = "IF-MIB::ifXTable"
+
+    # Interface tag - used to identify interface in metrics database
+    [[inputs.snmp.table.field]]
+      name = "ifDescr"
+      oid = "IF-MIB::ifDescr"
+      is_tag = true
+
+  # EtherLike-MIB::dot3StatsTable contains detailed ethernet-level information about what kind of errors have been logged on an interface (such as FCS error, frame too long, etc)
+  [[inputs.snmp.table]]
+    name = "interface"
+    inherit_tags = [ "hostname" ]
+    oid = "EtherLike-MIB::dot3StatsTable"
+
+    # Interface tag - used to identify interface in metrics database
+    [[inputs.snmp.table.field]]
+      name = "ifDescr"
+      oid = "IF-MIB::ifDescr"
+      is_tag = true
+````
+
+You will then need to change the `<SNMPHOST>` and `<SNMPCOMMUNITY>` values to match what we you set in the variables earlier.
+
+Save the file (Ctrl+O in nano) and then exit (CTRL+X in nano).
+
+
+Now restart Telegraf and check that it has restart sucessfuly
+
+````
+sudo systemctl stop telegraf
+sudo systemctl start telegraf
+systemctl status telegraf
+````
+
+In the status output you should now see that it is `active` and there is a new `snmp` loaded input.
+
+Give Telegraf a few minutes to run the queries then run start up the influxdb client
+
+````
+influx -precision rfc3339 -database monitoring
+````
+
+Lets see if we have any new data
+````
+show measurements
+````
+
+The ones we are interested in are snmp and interface. The snmp measurement just records the uptime of the host so lets concentrate on interface.
+
+To see what values we've got use
+````
+show field keys from interface
+````
+
+All of the values we were shown earlier should now be listed.  Lets get a report on the status of the interfaces
+
+````
+select ifOperStatus, hostname, ifName from interface
+````
+
+All the hosts and their interfaces should be listed. Note unlike SQL it is only possible ot order the results by time with Influx at the moment.
+
+Maybe we only care about interfaces that are currently up, let's see if there are any errors
+````
+select hostname, ifName, ifInErrors, ifOutErrors from interface where ifOperStatus = 1
+````
+
+
+### Calcuating Rates wth Influx
 TODO
