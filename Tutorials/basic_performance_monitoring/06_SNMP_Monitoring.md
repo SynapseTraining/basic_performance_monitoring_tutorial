@@ -251,14 +251,14 @@ show field keys from interface
 All of the values we were shown earlier should now be listed.  Lets get a report on the status of the interfaces
 
 ````
-select ifOperStatus, hostname, ifName from interface
+select ifOperStatus, hostname, ifDescr from interface
 ````
 
 All the hosts and their interfaces should be listed. Note unlike SQL it is only possible ot order the results by time with Influx at the moment.
 
 Maybe we only care about interfaces that are currently up, let's see if there are any errors
 ````
-select hostname, ifName, ifInErrors, ifOutErrors from interface where ifOperStatus = 1
+select hostname, ifDesr, ifInErrors, ifOutErrors from interface where ifOperStatus = 1
 ````
 
 
