@@ -1,4 +1,5 @@
-# Basic Performance Monitoring Server
+# Setting Up a Basic Performance Monitoring Server
+
 ## Setting Up SNMP Monitoring
 
 ### Installation
@@ -263,4 +264,48 @@ select hostname, ifDesr, ifInErrors, ifOutErrors from interface where ifOperStat
 
 
 ### Calcuating Rates wth Influx
-TODO
+Earlier in this section we mentioned that all Telegraf does is collect raw values.  When dealing with SNMP it doesn't under concepts of 
+bits second or errors by second.  Luckily the database does, so we can write queries to show us rate of change. 
+
+You maybe thinking this makes the collector (Telegraf) very limited but it is nothing of the sort.  Having the collector do just what it's 
+built to do (collector) data makes it more efficient.  It also means that if we need to manipulate the data later we can without loosing that 
+which we collected earlier.
+
+The InfluxDB function we will use is called DERIVATIVE. This function takes two field values and calculates the difference between them, this 
+gives us the rate of change.
+
+
+Here's our query, you'll need to change the <HOSTNAME> text to match the name of your device as returned by SNMP
+
+````
+select derivative(mean(ifHCOutOctets), 1s)*8 as bpsOut from "monitoring"."autogen"."interface" where time > now() - 1h and hostname='<HOSTNAME>' 
+GROUP BY time(10000ms), "ifDescr"
+````
+
+Let's explore this query...
+
+First we are retrieving the SNMP value for the number of Bytes going out of a given interface (replace with ifOutOctets if needed). The difference
+between this value and the previous value is calcuated and then the it is normalised to a 1 second value, this gives us Bytes Per Second (Bps).  
+We then multiple this value to give us bits per second (bps). With me so far?
+
+The next section (starting with "from") specifies where to obtain the data from, in this case our interface measurement within the monitoring 
+database. Don't worry too much about "autogen" for now, it's something to do with data retention that InfluxDB gives us default values for.
+
+The "where" section is used to filter the data returned.  In this case we only want values that our within the last hour and the hostname matches 
+the device we want to query. We will use this "hostname" later to allow easy selection between devices in Chrongraf. 
+
+The final section (starting with GROUP BY) is used to return the data in sensible batches which can be then be used by the DERIVATIVE function to
+calculate the rate of change.  If you have run the query already, you should have seen that a number of values were returned for each interface
+that had a ifDescr tag.
+
+
+### Summary
+In this section we configured telegraf to collect data from our device using SNMP.
+
+We then queried the data to ensure it was being gathered and had easily ways to filter it
+
+This section has probably been the hardest yet, I know it was for me as anything above basic addition and subtraction stretches my maths skills. 
+Suggest taking a break and this point, let Telegraf collect more data.
+
+Once you're ready proceed to the next section where we will [Create Chronograf Graphs From Scratch](07_Chronograf_Graph_From_Scratch.md).
+
