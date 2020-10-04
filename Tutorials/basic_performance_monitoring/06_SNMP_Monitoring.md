@@ -41,8 +41,11 @@ As stated in the introduction we won't be covering how to configure SNMP v2 or v
 you've done that yoursef already.
 
 Firstly store your SNMP community and Device IP in variables, that way the commands be can run exactly as shown
+
+```
 SNMPCOMMUNITY=<your community>
 SNMPHOST=<your device ip>
+````
 
 Let's see if we can obtain some basic information about our network device
 ````
