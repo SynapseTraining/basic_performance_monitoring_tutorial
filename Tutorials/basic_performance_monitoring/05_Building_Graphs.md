@@ -67,6 +67,7 @@ If you view a very short timeframe (less than 5 minutes) there simply won't be a
 ## Summary
 In this section we setup some basic visualisations for our data.  
 
-At this point I would recommend learning more about the InfluxQL language, starting from the CLI and then trying to visualise the data in Chrongraf.
+The next section we'll get more into network monitoring by querying our devices using SNMP.
 
-In a future chapter we will switch to using a more advanced Dashboarding software knowna as Grafana, this skills you learn here will be very useful then.
+When you are ready, let start [Setting Up SNMP Monitoring](06_SNMP_Monitoring.md)
+
