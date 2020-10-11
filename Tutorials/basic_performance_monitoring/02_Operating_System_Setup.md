@@ -23,7 +23,7 @@ Later tutorials will cover how to secure the system, for now lets just get it wo
 Although security updates would have been applied during setup, general bug fix ones wil not.
 1. Login as root (sudo -i)
 1. Update the local package repo (apt update)
-1. Update all packages without prompting (apt upgrade -Y)
+1. Update all packages without prompting (apt upgrade -y)
 1. Install useful tools (apt install <package-name>)
 .. net-tools
 1. Reload the server (reboot)
