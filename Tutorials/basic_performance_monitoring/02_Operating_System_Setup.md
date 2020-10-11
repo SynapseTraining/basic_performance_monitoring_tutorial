@@ -53,7 +53,9 @@ echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stabl
 ```
 
 Lets just verify that the package path was added correctly using the command `cat /etc/sources.list.d/influxdb.list`. Output should show:
+```
 deb https://repos.influxdata.com/ubuntu focal stable
+```
 
 Once again update the cached package lists (`sudo apt update`). You should note a couple of "repos.influxdata.com" entries.
 
@@ -83,10 +85,10 @@ Continue on to [Configuring Data Collection](03_Configuring_Basic_Data_Collectio
 
 # Reference
 ## InfluxData
-*Package Dowloads*
+**Package Dowloads**
 
 https://portal.influxdata.com/downloads/
 
-*Network Requirements*
+**Network Requirements**
 * Chronograf web interface port - TCP 8888
 * InfluxDB Default port - TCP 8086
