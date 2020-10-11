@@ -139,14 +139,47 @@ The dashboard is not that interesting to start, lets add some simple single coun
 Click *Add New Panel*
 
 
-TODO
+The *Stat* panel allows us to show a single statistic which can be useful for giving an overview of the environment.  In our case we going to set up a crewd counter for
+displaying how many hosts are reporting as up or down (based on the ping `result_code`).
 
 
-### Repeating charts
-TODO
+Under Panel > Settings, enter the *Panel Title* of `Hosts Responding`. Next select the *Stat* panel in the *Visualisation* section in the right sidebar.  You should et a message for `No data`. Let's write our query.
+
+Underneath the main display, the *Query* tab should already be selected. Click the button to toggle *Text Editor Mode*. You should now see a *SELECT* query, delete it and enter the 
+following query instead:
+```
+select count(host_status) from (SELECT last(result_code) as host_status FROM "monitoring"."autogen"."ping" where time > now() -8m and result_code = 0 group by url)
+```
+
+As long as you have a least one host that is up you should now get a number in the main display. This query is by no means perfect but for now it gets the job done.  One problem you will
+have is when no hosts up it will return to *No Data* because query returns no results (a *Null* result).  Try this now by changing the query to read `result_code = -1`, if you click out 
+of the query the display will refresh to *No Data*.
+
+Before you fix the query, let's fix this problem so it shows the number zero instead of *No Data*.  In the right-side bar:
+* Click the Field tab
+* Under *Standard Options*, look for the *No Value* option and enter the number 0 in the box. 
+
+As soon as you click out of the box, the display should now show 0 instead of 'No Data'.  Reset the query back to `result_code = 0` before continuing.
+
+We now need to save the dashboard
+* Click *Apply* in the top right corner to return to the main dashboard
+* Click the *Save* button (old fashioned floppy disk icon)
+* When prompted for a name called it *Scratchpad* or whatever takes your fancy
+
+As a test, I'd like you now to create a second *Stat* panel but this time for hosts that are not responding (or another error).  The query is the same but you need to use a fitler of
+`result_code <> 0` otherwsie all the steps above are the same (TIP: There is a copy option if you're feeling lazy).
+
+
+### Conclusion
+In this section we successfully installed Grafana to allow us to setup much more powerful dashboards than can be done with Chronograf.
+
+We also confirmed we can take data in from InfluxDB and use InfluxQL queries to display that data graphically.
+
+In the next section we will carry on using Grafana and try out some of it's more advanced queries to make setting up our dashboards more efficient.
+
 
 ### Reference
 
-*Grafana Documentation*
+**Grafana Documentation**
 
 https://grafana.com/docs/grafana/latest/
