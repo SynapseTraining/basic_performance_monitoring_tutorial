@@ -23,7 +23,7 @@ Later tutorials will cover how to secure the system, for now lets just get it wo
 Although security updates would have been applied during setup, general bug fix ones wil not.
 1. Login as root (sudo -i)
 1. Update the local package repo (apt update)
-1. Update all packages without prompting (apt upgrade -Y)
+1. Update all packages without prompting (apt upgrade -y)
 1. Install useful tools (apt install <package-name>)
 .. net-tools
 1. Reload the server (reboot)
@@ -38,28 +38,46 @@ For the tutorial we will mainly be using packages provided by InfluxData.  We ne
 and also any future updates.
 
 First we need to add the Influx Repo key so packages are trusted, a simple OK response indicates success:
+```
 curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+```
 
 Next, read in the release versions for Ubuntu:
+```
 source /etc/lsb-release
+```
 
 Now we need to add the InfluxData repo as a package source:
+```
 echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+```
 
-Lets just verify that the package path was added correctly (cat /etc/sources.list.d/influxdb.list):
+Lets just verify that the package path was added correctly using the command `cat /etc/sources.list.d/influxdb.list`. Output should show:
+```
 deb https://repos.influxdata.com/ubuntu focal stable
+```
 
-Once again update the cached package lists (sudo apt update). You should note a couple of "repos.influxdata.com" entries.
+Once again update the cached package lists (`sudo apt update`). You should note a couple of "repos.influxdata.com" entries.
 
 Assuming no error, lets install the tools we need:
+```
 apt install -y telegraf influxdb chronograf
+```
 
-If the installation succeeeds the telegraf and chronograf should be started automatically, verify with systemctl status followed by "telegraf or "chronograf".  
+If the installation succeeeds the telegraf and chronograf should be started automatically, verify with `systemctl status` followed by either `telegraf` or `chronograf`.  
 active (running) indicates the service is up.
 
-InfluxDB is not started automatically, fix this with systemctl start influxdb and then veryif using  systemctl status influxdb
+InfluxDB is not started automatically, run the command below to start it and check its status:
+```
+systemctl start influxdb
+systemctl status influxdb
+```
 
-Once they are all running very the ports are listing using netstat -atn | egrep "(8888|8086)", two TCP entries should show with LISTEN
+Once they are all running very the ports are listing:
+```
+netstat -atn | egrep "(8888|8086)"
+``` 
+The two TCP entries should show as LISTEN
 
 ## Summary
 In this section we have now sucessfully setup the basic server and can now get onto the more fun bits of making it do something. 
@@ -67,9 +85,10 @@ Continue on to [Configuring Data Collection](03_Configuring_Basic_Data_Collectio
 
 # Reference
 ## InfluxData
-** Package Dowloads **
+**Package Dowloads**
+
 https://portal.influxdata.com/downloads/
 
-** Network Requirements **
-Chronograf web interface port - TCP 8888
-InfluxDB Default port - TCP 8086
+**Network Requirements**
+* Chronograf web interface port - TCP 8888
+* InfluxDB Default port - TCP 8086
