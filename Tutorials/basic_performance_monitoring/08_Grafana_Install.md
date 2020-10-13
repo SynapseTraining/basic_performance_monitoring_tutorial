@@ -170,9 +170,9 @@ We now need to save the dashboard
 * Click the *Save* button (old fashioned floppy disk icon)
 * When prompted for a name called it *Scratchpad* or whatever takes your fancy
 
-As a test, I'd like you now to create a second *Stat* panel but this time for hosts that are not responding (or another error).  The query is the same but you need to use a fitler of
-`result_code <> 0` otherwsie all the steps above are the same (TIP: There is a copy option if you're feeling lazy). 
-Don't forget to save after adding the second panel.
+As a test, I'd like you now to create a second *Stat* panel but this time for hosts that are not responding (or another error).  
+The query is the same but you need to use a fitler of `result_code <> 0` otherwsie all the steps above are the same (TIP: There
+is a copy option if you're feeling lazy). Don't forget to save after adding the second panel.
 
 It should be noted that this query is not 100% robust.  Depending on when the checks are done and the dashboard is refreshed,
 you may see inconsistent results (such as hosts counted in both up and down). This should only be a problem if you are very
@@ -181,11 +181,13 @@ intently watching the dashboard, it still works to give you a good overview of t
 In later sections we'll add more advanced features (such as data aggregation) to fix this problem.
 
 ### Conclusion
-In this section we successfully installed Grafana to allow us to setup much more powerful dashboards than can be done with Chronograf.
+In this section we successfully installed Grafana to allow us to setup much more powerful dashboards than can be done 
+with Chronograf.
 
 We also confirmed we can take data in from InfluxDB and use InfluxQL queries to display that data graphically.
 
-In the next section we will carry on using Grafana and try out some of it's more advanced queries to make setting up our dashboards more efficient.
+In the next section we will carry on using Grafana and try out some of it's more advanced queries to make setting up 
+our dashboards more efficient.
 
 ### Reference
 
