@@ -18,8 +18,8 @@ This installation of Grafana we will be doing in this section should in no way b
 It will not be setup for authentication or encrypted traffic.
 
 ### Setting Up Repositories
-Grafana maintain a set of pre-built packages for Debian-based distributions.  This makes installation easy as well as allowing for simple updates to deal with
-bug fixes and security issues.
+Grafana maintain a set of pre-built packages for Debian-based distributions.  This makes installation easy as well as 
+allowing for simple updates to deal with bug fixes and security issues.
 
 First, lets install the HTTPS transport so we can get packages over a secure connection
 
@@ -148,18 +148,22 @@ Under Panel > Settings, enter the *Panel Title* of `Hosts Responding`. Next sele
 Underneath the main display, the *Query* tab should already be selected. Click the button to toggle *Text Editor Mode*. You should now see a *SELECT* query, delete it and enter the 
 following query instead:
 ```
-select count(host_status) from (SELECT last(result_code) as host_status FROM "monitoring"."autogen"."ping" where time > now() -8m and result_code = 0 group by url)
+select count(host_status) from (SELECT last(result_code) as host_status FROM "monitoring"."autogen"."ping" 
+where time > now() -5m and result_code = 0  group by url)
 ```
 
 As long as you have a least one host that is up you should now get a number in the main display. This query is by no means perfect but for now it gets the job done.  One problem you will
 have is when no hosts up it will return to *No Data* because query returns no results (a *Null* result).  Try this now by changing the query to read `result_code = -1`, if you click out 
 of the query the display will refresh to *No Data*.
 
-Before you fix the query, let's fix this problem so it shows the number zero instead of *No Data*.  In the right-side bar:
+Before you save the query, let's fix this problem so it shows the number zero instead of *No Data*.  In the right-side bar:
 * Click the Field tab
 * Under *Standard Options*, look for the *No Value* option and enter the number 0 in the box. 
 
 As soon as you click out of the box, the display should now show 0 instead of 'No Data'.  Reset the query back to `result_code = 0` before continuing.
+
+It's probably useful if the dashboard also refreshes, you can change this be selecting a value from the drop down in 
+the far-right corner. As checks are only done every 5 minutes, there's not much point in setting it any less than that.
 
 We now need to save the dashboard
 * Click *Apply* in the top right corner to return to the main dashboard
@@ -167,8 +171,14 @@ We now need to save the dashboard
 * When prompted for a name called it *Scratchpad* or whatever takes your fancy
 
 As a test, I'd like you now to create a second *Stat* panel but this time for hosts that are not responding (or another error).  The query is the same but you need to use a fitler of
-`result_code <> 0` otherwsie all the steps above are the same (TIP: There is a copy option if you're feeling lazy).
+`result_code <> 0` otherwsie all the steps above are the same (TIP: There is a copy option if you're feeling lazy). 
+Don't forget to save after adding the second panel.
 
+It should be noted that this query is not 100% robust.  Depending on when the checks are done and the dashboard is refreshed,
+you may see inconsistent results (such as hosts counted in both up and down). This should only be a problem if you are very
+intently watching the dashboard, it still works to give you a good overview of the health of your environment.
+
+In later sections we'll add more advanced features (such as data aggregation) to fix this problem.
 
 ### Conclusion
 In this section we successfully installed Grafana to allow us to setup much more powerful dashboards than can be done with Chronograf.
@@ -176,7 +186,6 @@ In this section we successfully installed Grafana to allow us to setup much more
 We also confirmed we can take data in from InfluxDB and use InfluxQL queries to display that data graphically.
 
 In the next section we will carry on using Grafana and try out some of it's more advanced queries to make setting up our dashboards more efficient.
-
 
 ### Reference
 
